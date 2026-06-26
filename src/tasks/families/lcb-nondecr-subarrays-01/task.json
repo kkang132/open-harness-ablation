@@ -1,0 +1,14 @@
+{
+  "id": "lcb-nondecr-subarrays-01",
+  "family": "lcb-hard",
+  "prompt": "prompt.md",
+  "cwd": "workdir",
+  "compileCmd": "npx tsc --noEmit solution.ts",
+  "visibleCmd": "npx vitest run tests/visible",
+  "hiddenCmd": "npx vitest run tests/hidden",
+  "nVisible": 4,
+  "nHidden": 3,
+  "selectionSeed": 1729,
+  "timeoutSec": 180,
+  "difficulty": "band-3"
+}

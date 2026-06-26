@@ -1,0 +1,14 @@
+{
+  "id": "path-normalize-01",
+  "family": "path-normalize",
+  "prompt": "prompt.md",
+  "cwd": "workdir",
+  "compileCmd": "npx tsc --noEmit normalize.ts",
+  "visibleCmd": "npx vitest run tests/visible",
+  "hiddenCmd": "npx vitest run tests/hidden",
+  "nVisible": 2,
+  "nHidden": 2,
+  "selectionSeed": 1729,
+  "timeoutSec": 120,
+  "difficulty": "band-2"
+}

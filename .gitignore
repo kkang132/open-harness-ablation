@@ -1,0 +1,6 @@
+node_modules/
+.env
+*.log
+
+# Run artifacts (transcripts, sandboxes, summaries) embed local paths; never commit.
+results/

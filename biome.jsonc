@@ -1,0 +1,27 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.1/schema.json",
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        // tsconfig sets noUncheckedIndexedAccess, so arr[i] is T | undefined.
+        // The ! assertion after a bounds-checked access is the sanctioned
+        // response; we keep the safety and silence the lint.
+        "noNonNullAssertion": "off"
+      }
+    }
+  },
+  "files": {
+    // Task fixtures under families/ are test data, not harness source. Keep them
+    // pristine: the linter and formatter must not touch them (tsconfig excludes
+    // them from typechecking for the same reason).
+    "includes": ["src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "!src/tasks/families"]
+  }
+}
