@@ -1,6 +1,6 @@
 # open-harness-ablation
 
-A coding agent is a model plus a harness. The harness is the program around the model: it reads files, runs tools, and loops until the task is done. Most effort goes into choosing the model. This project leaves the model alone and changes the harness, which is open source, so each change is plain to read and to verify. Two such changes, both deterministic, raise a 12B model close to a model twice its size on a small set of coding tasks chosen so the smaller model fails them. The model is unchanged. Everything runs locally, and no calls are billed.
+A coding agent is a model plus a harness. The harness is the program around the model: it reads files, runs tools, and loops until the task is done. Most effort goes into choosing the model. This project leaves the model alone and changes the harness, which is open source, so each change is plain to read and to verify. Two such changes, both deterministic, raise a 12B-A2.5B model close to a model twice its size on a small set of coding tasks chosen so the smaller model fails them. The model is unchanged. Everything runs locally, and no calls are billed.
 
 ## Result
 
