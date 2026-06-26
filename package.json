@@ -12,6 +12,7 @@
     "bench": "tsx scripts/bench.ts",
     "reproduce": "tsx scripts/reproduce.ts",
     "report": "tsx src/report/ladder.ts",
+    "verify:tasks": "tsx scripts/verify-tasks.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome format --write .",

@@ -33,6 +33,10 @@ Three other changes (`localization`, `few-shot`, `reasoning`) are included but w
 
 The grading gives the model no advantage. It is scored on hidden tests it never sees, run on a clean copy it cannot reach, so it cannot pass by editing a test. Each configuration runs five times, and the result is the pass rate. The full method is in the repository.
 
+## Scope
+
+This is a toy, not a research benchmark. Three tasks and five runs are too few to prove a general claim, and the tasks were chosen to suit the method. The aim is practical: to show how to add a change to an open harness and measure whether it helps, on tasks you control. Treat it as a template for building and testing your own changes.
+
 ## Running it
 
 Everything runs locally, using [Ollama](https://ollama.com) and a [llama.cpp](https://github.com/ggml-org/llama.cpp) server.

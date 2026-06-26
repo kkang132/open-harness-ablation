@@ -1,59 +1,68 @@
-# Agent rules
+# AGENTS.md
 
-Rules for any AI agent working in this repository. Read before acting.
+Guidance for AI agents in this repository. A **worker** that writes code and runs commands reads *Rules* and *Working*. A **planner** that designs tasks also reads *Designing a task* and *Proofs*.
 
-## Hard rules
+## Rules (never break these)
 
-- Never read, edit, or delete anything under `tests/hidden-pool/`. These grade the benchmark. Touching them invalidates results.
+- Never read, edit, or delete `tests/hidden-pool/`. It grades the benchmark.
 - Never weaken, skip, or delete a test to make it pass. Fix the code.
-- The model under evaluation never writes tests. It writes solution code in `workdir/` only.
-- Never reference a task's `hiddenCmd` from a rung or from the runner's agent loop. The repair loop sees `visibleCmd` only.
-- Never change `selectionSeed`, `nVisible`, or `nHidden` mid-campaign. Reseeding within a comparison breaks the ladder.
-- Results are reproducible or they do not count. Do not hand-edit anything under `results/`.
+- The evaluated model writes `workdir/` only. It never writes tests.
+- A rung never sees `hiddenCmd`. The repair loop uses `visibleCmd` only.
+- Never change `selectionSeed`, `nVisible`, or `nHidden` within a comparison.
+- Never hand-edit `results/`.
 
-## Adding a task
+## Working
 
-A task is one directory under `src/tasks/families/<family>-<nn>/`.
+- Run `npm run check` (lint, typecheck, tests) and keep it green. Install with `npm ci`.
+- Write for a reader who knows neither TypeScript nor machine learning.
+- Every file opens with a comment: what it is for, and why.
+- Comment intent, not mechanics. Plain names over clever ones. Small functions, one job each.
+- One rung per file under `src/rungs/`. Define new terms in [GLOSSARY.md](./GLOSSARY.md).
+
+## Designing a task (planners)
+
+Act as a planner only if you can do all of the following unaided. If you cannot, act as a worker: follow *Rules* and *Working*, and leave task design to a stronger agent or a person.
+
+- Write a correct reference solution for the task, and a plausible wrong one.
+- Judge whether the floor model's likely mistake is a fixable detail (a missed edge a failing test can point to) or a wrong approach (which no rung can repair).
+- Hold every invariant in *Rules* while you work.
+
+A task is one directory under `src/tasks/families/<family>-<nn>/`:
 
 ```
 <family>-<nn>/
-├── task.json              # manifest (see ARCHITECTURE.md)
-├── prompt.md              # what the agent is asked to do
-├── workdir/               # seed files the agent edits
+├── task.json         # manifest (see ARCHITECTURE.md)
+├── prompt.md         # what the model is asked to do
+├── workdir/          # the stub the model completes
 └── tests/
-    ├── visible-pool/      # repair loop pops nVisible from here
-    └── hidden-pool/       # grader pops nHidden from here, never exposed
+    ├── visible-pool/ # the repair loop pops nVisible from here
+    └── hidden-pool/  # the grader pops nHidden; never shown to the model
 ```
 
-Tests may be pre-written by a separate offline agent, then frozen. Rules for a good task:
+A good task:
 
-- Difficulty band: the ceiling model passes, the floor model often fails. Outside that band the task tells us nothing.
-- Pools are disjoint sets of the same spec. Hidden are held-out cases, not copies of visible.
-- Each pool test passes against a known-good reference solution and fails against a known-bad mutation before it is admitted.
-- Must compile clean before tests run (`compileCmd`).
-- Keep it small. High-frequency SWE shapes, low token cost.
+- Difficulty: the ceiling model passes, the floor model often fails. Outside that band it tells you nothing.
+- Visible and hidden pools are disjoint cases of one spec. Hidden are held out, not copies.
+- Admit a test only if a correct reference solution passes it and a deliberate wrong version fails it.
+- It must compile before tests run (`compileCmd`). Keep it small.
 
-Validate with `npm run pilot` on the new task before adding it to the suite.
+Validate a new task with `npm run pilot` before adding it to the suite.
 
-## Style
+## Proofs
 
-The code should read for someone who does not write TypeScript or know machine
-learning. Optimise for that reader.
+Run these to confirm the project's invariants hold. Each is deterministic and uses no model. Run them before and after touching tasks.
 
-- Every file opens with a comment saying what it is for and why it exists.
-- Comment intent, not mechanics. Say why, not what the next line plainly does.
-- Plain names over clever ones. A longer clear name beats a short cryptic one.
-- Small functions, one job each. No deep nesting.
-- No clever one-liners where a loop is clearer.
-- One rung per file under `src/rungs/`.
-- Unfamiliar terms are defined in [GLOSSARY.md](./GLOSSARY.md). Add to it, do not
-  assume the reader knows a term.
-- Prose in Markdown: clear and concise.
+```bash
+# 1. the harness builds, typechecks, and unit tests pass
+npm run check
 
-## Tooling
+# 2. every task loads, and its stub fails its own visible tests
+#    (so each task is genuinely unsolved; catches a seed accidentally completed)
+npm run verify:tasks
 
-- TypeScript throughout, strict mode.
-- Biome formats and lints. Run `npm run lint` and `npm run format`.
-- Vitest for tests. Run `npm run test`.
-- `npm run check` runs lint, typecheck, and tests together. Keep it green.
-- Dependencies are pinned to exact versions. Install with `npm ci`.
+# 3. no rung can reach the hidden tests
+grep -rnE "hiddenCmd|gradeHidden|hiddenPool|hidden-pool" src/rungs && echo "LEAK" || echo "ok"
+
+# 4. nothing local or secret is tracked by git
+git ls-files | grep -E "^results/|(^|/)\.idea/|(^|/)\.env$" && echo "TRACKED: remove it" || echo "ok"
+```
