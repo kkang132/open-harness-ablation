@@ -4,7 +4,7 @@ A coding agent is a model plus a harness. The harness is the program around the 
 
 ## Result
 
-The small model is JetBrains' [Mellum2](https://huggingface.co/collections/JetBrains/mellum-2) (12B-A2.5B, JetBrains). It runs on [Pi](https://github.com/badlogic/pi-mono), a small open harness. The larger model, OpenAI's `gpt-oss:20b`, marks the next tier. The work is three TypeScript utilities, each implemented from a written specification: a parser for `.env` files, a slugifier that turns a title into a URL segment, and a parser for query strings. The model is given a natural-language specification and a typed, empty function stub, and must complete it. The result is graded on hidden tests, five runs each.
+The small model is [Mellum2](https://huggingface.co/collections/JetBrains/mellum-2) (12B-A2.5B, JetBrains). It runs on [Pi](https://github.com/badlogic/pi-mono), a small open harness. The larger model, OpenAI's `gpt-oss:20b`, marks the next tier. The work is three TypeScript utilities, each implemented from a written specification: a parser for `.env` files, a slugifier that turns a title into a URL segment, and a parser for query strings. The model is given a natural-language specification and a typed, empty function stub, and must complete it. The result is graded on hidden tests, five runs each.
 
 | Setup | Tasks passed (hidden tests, n=15) |
 |-------|-----------------------------------|
@@ -14,6 +14,8 @@ The small model is JetBrains' [Mellum2](https://huggingface.co/collections/JetBr
 | gpt-oss:20b, stock harness | 80% (12/15) |
 
 The two changes raise the small model from 27% to 73%; the larger model scores 80%. On this small, deliberately gap-selected set, the changes recover most of the distance to the larger model. They add no billed API cost, but they do spend more local inference: best-of-N samples twice, and verify-repair retries. `FINDINGS.md` gives the complete numbers and the caveats.
+
+NB: I use a small number of tasks and seeds because the ablation is multiplicative: tasks × variants × trials × hidden tests. A 20-task version is feasible but slow; this repo is meant to expose the mechanism, not exhaustively estimate it.
 
 ## Why these tasks
 
