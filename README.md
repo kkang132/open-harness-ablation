@@ -60,3 +60,7 @@ npm run reproduce            # run the comparison, write results/summary/ladder.
 - [ARCHITECTURE.md](./ARCHITECTURE.md): how it works inside.
 - [AGENTS.md](./AGENTS.md): rules for agents in the repo, and how to add a task.
 - [GLOSSARY.md](./GLOSSARY.md): every term in plain language.
+
+## License
+
+Apache 2.0. See [LICENSE](./LICENSE).
