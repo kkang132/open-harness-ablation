@@ -1,26 +1,25 @@
 // Pilot screen. Rank each candidate rung's expected value before investing in the
-// full suite. Floor vs floor+one-rung, on a few tasks, k=3, local 20b only.
+// full suite. Floor vs floor+one-rung, on the headline tasks, k=3. Same floor as
+// the headline (Mellum2, served on :8080).
 //
 // Run: npm run pilot
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { type Arm, CANDIDATE_RUNGS, FLOOR } from "../src/harness/arm.ts";
+import { type Arm, CANDIDATE_RUNGS, FLOOR, FLOOR_MODEL } from "../src/harness/arm.ts";
 import { runTrial, type TrialRecord } from "../src/harness/runner.ts";
 import { aggregate } from "../src/report/aggregate.ts";
-import { loadTaskFamilies } from "../src/tasks/manifest.ts";
+import { loadTask } from "../src/tasks/manifest.ts";
 
 const K = 3;
-const PILOT_TASK_COUNT = 3;
 const REPAIR_CAP = 3;
+
+// The headline tasks: the floor fails them at baseline but the failures are fixable.
+const TASK_IDS = ["swe-envfile-01", "swe-slugify-01", "swe-querystring-01"];
 
 async function main(): Promise<void> {
   const resultsDir = join(process.cwd(), "results");
-  const tasks = loadTaskFamilies(join(process.cwd(), "src", "tasks", "families")).slice(0, PILOT_TASK_COUNT);
-  if (tasks.length === 0) {
-    console.error("No tasks found under src/tasks/families. Author a task first (see AGENTS.md).");
-    process.exit(1);
-  }
+  const tasks = TASK_IDS.map((id) => loadTask(join(process.cwd(), "src", "tasks", "families", id)));
 
   // Floor, plus one arm per candidate rung (floor + that rung alone).
   const arms: Arm[] = [
@@ -30,6 +29,7 @@ async function main(): Promise<void> {
       label: `floor + ${rung.name}`,
       modelKey: "local-20b" as const,
       rungs: [rung],
+      ...FLOOR_MODEL,
     })),
   ];
 

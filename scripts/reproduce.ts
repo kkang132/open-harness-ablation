@@ -12,7 +12,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Arm } from "../src/harness/arm.ts";
+import { type Arm, FLOOR_MODEL } from "../src/harness/arm.ts";
 import { runTrial, type TrialRecord } from "../src/harness/runner.ts";
 import { aggregate } from "../src/report/aggregate.ts";
 import { renderLadder } from "../src/report/ladder.ts";
@@ -23,25 +23,29 @@ import { loadTask } from "../src/tasks/manifest.ts";
 const K = 5;
 const REPAIR_CAP = 3;
 
-// Floor: a small local model served by llama.cpp. Ceiling: a larger local model
-// via Ollama. Adjust ids/URLs to your setup.
-const FLOOR = { modelId: "mellum2-instruct", baseUrl: "http://127.0.0.1:8080/v1" };
-
-// Tasks where the floor model fails at baseline but the failures are fixable
-// (chosen by a floor pre-screen; see FINDINGS.md).
+// Floor model: a small local model served by llama.cpp (FLOOR_MODEL, shared with
+// arm.ts). Ceiling: a larger local model via Ollama, resolved from modelKey.
+// Tasks where the floor fails at baseline but the failures are fixable (chosen by a
+// floor pre-screen; see FINDINGS.md).
 const TASK_IDS = ["swe-envfile-01", "swe-slugify-01", "swe-querystring-01"];
 
 async function main(): Promise<void> {
   const resultsDir = join(process.cwd(), "results");
   const arms: Arm[] = [
-    { name: "floor", label: "Mellum2 floor", modelKey: "local-20b", rungs: [], ...FLOOR },
-    { name: "+verify-repair", label: "+ verify-repair", modelKey: "local-20b", rungs: [verifyRepairRung()], ...FLOOR },
+    { name: "floor", label: "Mellum2 floor", modelKey: "local-20b", rungs: [], ...FLOOR_MODEL },
+    {
+      name: "+verify-repair",
+      label: "+ verify-repair",
+      modelKey: "local-20b",
+      rungs: [verifyRepairRung()],
+      ...FLOOR_MODEL,
+    },
     {
       name: "+verify-repair+best-of-N",
       label: "+ verify-repair + best-of-N",
       modelKey: "local-20b",
       rungs: [verifyRepairRung(), bestOfNRung(2)],
-      ...FLOOR,
+      ...FLOOR_MODEL,
     },
     { name: "ceiling", label: "gpt-oss:20b ceiling", modelKey: "local-20b", rungs: [] },
   ];
