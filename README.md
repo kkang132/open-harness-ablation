@@ -17,6 +17,15 @@ The two changes raise the small model's performance from 27% to 73%; the larger 
 
 NB: I use a small number of tasks and seeds because the ablation is multiplicative: tasks × variants × trials × hidden tests. A 20-task version is feasible but slow; this repo is meant to expose the mechanism, not exhaustively estimate it.
 
+## What this teaches
+
+The result is small. The method is the point. Four things carry over to any model and any codebase:
+
+- **The harness is where you add capability you own.** Two deterministic changes moved a 12B model most of a tier, with the model untouched. The same changes apply to a model you already run, including a local one, where the model itself is fixed and the scaffolding is the only thing in your hands.
+- **Measure so the system cannot cheat.** Grade on hidden tests, on a clean copy the model cannot reach; choose the tasks before the run; report denominators, not just percentages. A number from an eval the system can game teaches nothing.
+- **Capability bought with compute is still bought.** `best-of-N` did most of the lift, at twice the samples. Every harness change has a cost as well as an effect; measure both, or the comparison is incomplete.
+- **Check that the harness can read the model before blaming the model.** A model that emits tool calls as plain text does nothing useful until the harness parses them. The `tool-call-adapter` rung does only that, and it is the difference between a model that acts and one that looks incapable.
+
 ## Why these tasks
 
 A harness change helps only where the model fails, and only when the failure can be corrected from a test result. These three tasks meet both conditions. Each has a short, exact specification and many edge cases: an empty input, a quoted value, a repeated key. The model usually handles the common case and fails an edge case. The failure appears as a failing test, and from the test the model can repair its code. A harder problem, wrong in its overall approach rather than in a detail, gives the harness nothing to repair. The tasks were also chosen in advance, by running the small model and keeping only the ones it failed; there is no point measuring a change where the baseline already passes.
