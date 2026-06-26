@@ -1,5 +1,7 @@
-// Full benchmark. The cumulative ladder over the whole task suite, k=5.
-// Produces the hero chart.
+// Fuller sweep. The cumulative ladder (every candidate rung) on the Mellum2 floor,
+// over every task family in the repo, k=5. This is wider but looser than the
+// headline: it includes extra tasks that were not floor-pre-screened, and it has
+// no ceiling arm. For the trustworthy headline result use scripts/reproduce.ts.
 //
 // Run: npm run bench  (then npm run report to redraw the ladder)
 

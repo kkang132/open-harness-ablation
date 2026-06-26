@@ -28,10 +28,17 @@ export interface Arm {
 // Candidate rungs in oracle-leverage order. The pilot screens these one at a time.
 export const CANDIDATE_RUNGS: Rung[] = [verifyRepairRung(), bestOfNRung(2), localizationRung(), fewShotRung()];
 
-// Bar A: the floor. Local model, stock harness, no rungs.
-export const FLOOR: Arm = { name: "A", label: "gpt-oss:20b stock Pi", modelKey: "local-20b", rungs: [] };
+// The floor model: the small local model under test, served by a llama.cpp server
+// on :8080. Point modelId/baseUrl elsewhere to study a different floor. reproduce.ts
+// reuses this constant so the headline and the fuller sweep share one floor.
+export const FLOOR_MODEL = { modelId: "mellum2-instruct", baseUrl: "http://127.0.0.1:8080/v1" } as const;
+
+// Bar A: the floor. Small local model, stock harness, no rungs.
+export const FLOOR: Arm = { name: "A", label: "Mellum2 floor", modelKey: "local-20b", rungs: [], ...FLOOR_MODEL };
 
 // The cumulative ladder: A, then +each candidate rung in order, ending at hero B.
+// Same floor as the headline; this sweep adds every candidate rung, not just the
+// two the headline needed.
 export function cumulativeLadder(): Arm[] {
   const arms: Arm[] = [FLOOR];
   const acc: Rung[] = [];
@@ -40,9 +47,10 @@ export function cumulativeLadder(): Arm[] {
     const isHero = i === CANDIDATE_RUNGS.length - 1;
     arms.push({
       name: isHero ? "B" : `B${i + 1}`,
-      label: isHero ? `gpt-oss:20b + all rungs` : `gpt-oss:20b + ${acc.map((r) => r.name).join(" + ")}`,
+      label: isHero ? `Mellum2 + all rungs` : `Mellum2 + ${acc.map((r) => r.name).join(" + ")}`,
       modelKey: "local-20b",
       rungs: acc.slice(),
+      ...FLOOR_MODEL,
     });
   });
   return arms;
