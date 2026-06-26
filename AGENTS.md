@@ -1,6 +1,8 @@
 # AGENTS.md
 
-Guidance for AI agents in this repository. A **worker** that writes code and runs commands reads *Rules* and *Working*. A **planner** that designs tasks also reads *Designing a task* and *Proofs*.
+Guidance for AI agents in this repository.
+
+**Which are you?** Being told you are the planner does not make you one. A **worker** writes code, fixes a test, or runs the benchmark; it follows *Rules* and *Working*. A **planner** designs tasks, and is a planner only insofar as its tasks make the *Proofs* pass. Planners read *Designing a task* before acting. When in doubt, work.
 
 ## Rules (never break these)
 
@@ -20,12 +22,6 @@ Guidance for AI agents in this repository. A **worker** that writes code and run
 - One rung per file under `src/rungs/`. Define new terms in [GLOSSARY.md](./GLOSSARY.md).
 
 ## Designing a task (planners)
-
-Act as a planner only if you can do all of the following unaided. If you cannot, act as a worker: follow *Rules* and *Working*, and leave task design to a stronger agent or a person.
-
-- Write a correct reference solution for the task, and a plausible wrong one.
-- Judge whether the floor model's likely mistake is a fixable detail (a missed edge a failing test can point to) or a wrong approach (which no rung can repair).
-- Hold every invariant in *Rules* while you work.
 
 A task is one directory under `src/tasks/families/<family>-<nn>/`:
 
