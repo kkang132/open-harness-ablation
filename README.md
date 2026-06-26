@@ -35,7 +35,7 @@ The grading gives the model no advantage. It is scored on hidden tests it never 
 
 ## Scope
 
-This is a toy, not a research benchmark. Three tasks and five runs are too few to prove a general claim, and the tasks were chosen to suit the method. The aim is practical: to show how to add a change to an open harness and measure whether it helps, on tasks you control. Treat it as a template for building and testing your own changes.
+This is a toy, not a research benchmark. Three tasks and five runs are too few to prove a general claim, and the tasks were chosen to suit the method. The counts are bounded by run time: every trial runs a local model end to end on one laptop (Apple M4 Max, 64 GB), so the number of rungs, arms, and tasks is what finishes in reasonable time, not what would be ideal. The aim is practical: to show how to add a change to an open harness and measure whether it helps, on tasks you control. Treat it as a template for building and testing your own changes.
 
 Do not read it as: a benchmark, a model ranking, or a general comparison of Mellum2 and gpt-oss:20b. The numbers describe these three tasks under this setup, nothing wider.
 
