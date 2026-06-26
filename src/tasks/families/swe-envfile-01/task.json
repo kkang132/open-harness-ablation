@@ -1,0 +1,14 @@
+{
+  "id": "swe-envfile-01",
+  "family": "swe-util",
+  "prompt": "prompt.md",
+  "cwd": "workdir",
+  "compileCmd": "npx tsc --noEmit envfile.ts",
+  "visibleCmd": "npx vitest run tests/visible",
+  "hiddenCmd": "npx vitest run tests/hidden",
+  "nVisible": 5,
+  "nHidden": 5,
+  "selectionSeed": 1729,
+  "timeoutSec": 120,
+  "difficulty": "swe"
+}

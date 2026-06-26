@@ -1,0 +1,33 @@
+{
+  "name": "pi-harness-ablation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cheap harness modifications lift a small local model toward the next model tier on real-world SWE tasks.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "pilot": "tsx scripts/pilot.ts",
+    "bench": "tsx scripts/bench.ts",
+    "reproduce": "tsx scripts/reproduce.ts",
+    "report": "tsx src/report/ladder.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "check": "biome check . && tsc --noEmit && vitest run"
+  },
+  "comment": "Dependencies are pinned to exact versions (no ^ or ~). Commit the lockfile and install with `npm ci` so a malicious patch release cannot enter via a version range.",
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "0.79.10",
+    "@earendil-works/pi-ai": "0.79.10",
+    "@earendil-works/pi-coding-agent": "0.79.10"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.1",
+    "tsx": "4.22.4",
+    "typescript": "6.0.3",
+    "vitest": "4.1.9"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "off-by-one-01",
+  "family": "off-by-one",
+  "prompt": "prompt.md",
+  "cwd": "workdir",
+  "compileCmd": "npx tsc --noEmit chunk.ts",
+  "visibleCmd": "npx vitest run tests/visible",
+  "hiddenCmd": "npx vitest run tests/hidden",
+  "nVisible": 2,
+  "nHidden": 2,
+  "selectionSeed": 1729,
+  "timeoutSec": 120,
+  "difficulty": "band-2"
+}
