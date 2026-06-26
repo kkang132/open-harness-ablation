@@ -60,8 +60,9 @@ confirmed both, which is why pre-selection matters).
 | + verify-repair + best-of-N | 4/5 | 4/5 | 3/5 | **73%** |
 | gpt-oss:20b (ceiling) | 3/5 | 5/5 | 4/5 | **80%** |
 
-**The harness takes Mellum2 from 27% to 73%, closing about 85% of the gap to the
-next model tier, for free.**
+**The harness takes Mellum2 from 27% to 73% (11/15), closing about 85% of the gap
+to the next model tier, with no billed API cost.** (The rungs do spend more local
+inference; see the caveats below.)
 
 ## What each rung did
 

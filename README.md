@@ -1,19 +1,19 @@
 # open-harness-ablation
 
-A coding agent is a model plus a harness. The harness is the program around the model: it reads files, runs tools, and loops until the task is done. Most effort goes into choosing the model. This project leaves the model alone and changes the harness, which is open source, so each change is plain to read and to verify. Two such changes, both deterministic, raise a 12B model to nearly the level of a model twice its size, on ordinary coding tasks. The model is unchanged. Everything runs locally, and no calls are billed.
+A coding agent is a model plus a harness. The harness is the program around the model: it reads files, runs tools, and loops until the task is done. Most effort goes into choosing the model. This project leaves the model alone and changes the harness, which is open source, so each change is plain to read and to verify. Two such changes, both deterministic, raise a 12B model close to a model twice its size on a small set of coding tasks chosen so the smaller model fails them. The model is unchanged. Everything runs locally, and no calls are billed.
 
 ## Result
 
 The small model is [Mellum2](https://huggingface.co/collections/JetBrains/mellum-2) (12B-A2.5B, JetBrains). It runs on [Pi](https://github.com/badlogic/pi-mono), a small open harness. The larger model, OpenAI's `gpt-oss:20b`, marks the next tier. The work is three TypeScript utilities, each implemented from a written specification: a parser for `.env` files, a slugifier that turns a title into a URL segment, and a parser for query strings. The model is given a natural-language specification and a typed, empty function stub, and must complete it. The result is graded on hidden tests, five runs each.
 
-| Setup | Tasks passed (hidden tests) |
-|-------|-----------------------------|
-| Mellum2, stock harness | 27% |
-| with verify-repair | 40% |
-| with verify-repair and best-of-N | 73% |
-| gpt-oss:20b, stock harness | 80% |
+| Setup | Tasks passed (hidden tests, n=15) |
+|-------|-----------------------------------|
+| Mellum2, stock harness | 27% (4/15) |
+| with verify-repair | 40% (6/15) |
+| with verify-repair and best-of-N | 73% (11/15) |
+| gpt-oss:20b, stock harness | 80% (12/15) |
 
-The two changes raise the small model from 27% to 73%; the larger model scores 80%. The changes recover most of the gap, at no extra token cost. `FINDINGS.md` gives the complete numbers and the caveats.
+The two changes raise the small model from 27% to 73%; the larger model scores 80%. On this small, deliberately gap-selected set, the changes recover most of the distance to the larger model. They add no billed API cost, but they do spend more local inference: best-of-N samples twice, and verify-repair retries. `FINDINGS.md` gives the complete numbers and the caveats.
 
 ## Why these tasks
 
@@ -36,6 +36,8 @@ The grading gives the model no advantage. It is scored on hidden tests it never 
 ## Scope
 
 This is a toy, not a research benchmark. Three tasks and five runs are too few to prove a general claim, and the tasks were chosen to suit the method. The aim is practical: to show how to add a change to an open harness and measure whether it helps, on tasks you control. Treat it as a template for building and testing your own changes.
+
+Do not read it as: a benchmark, a model ranking, or a general comparison of Mellum2 and gpt-oss:20b. The numbers describe these three tasks under this setup, nothing wider.
 
 ## Running it
 
