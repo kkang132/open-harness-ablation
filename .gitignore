@@ -4,3 +4,8 @@ node_modules/
 
 # Run artifacts (transcripts, sandboxes, summaries) embed local paths; never commit.
 results/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store

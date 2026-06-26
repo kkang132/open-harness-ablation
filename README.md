@@ -1,83 +1,58 @@
 # pi-harness-ablation
 
-Cheap, generic modifications to a lightweight coding **harness** can lift a small
-local model most of the way to the next model tier on real-world software
-tasks. No fine-tuning, no model change, no API cost. The lever is the harness.
+A coding agent is a model plus a harness. The harness is the program around the model: it reads files, runs tools, and loops until the task is done. Most effort goes into choosing the model. This project leaves the model alone and changes the harness, which is open source, so each change is plain to read and to verify. Two such changes, both deterministic, raise a 12B model to nearly the level of a model twice its size, on ordinary coding tasks. The model is unchanged. Everything runs locally, and no calls are billed.
 
 ## Result
 
-A local 12B model (Mellum2) running on a stock harness, then with two cheap rungs
-added, measured against a larger local model (gpt-oss:20b) as the ceiling. Three
-real-world TypeScript tasks (an `.env` parser, a URL slugifier, a query-string
-parser), graded on held-out hidden tests, k=5 seeds.
+The small model is [Mellum2](https://huggingface.co/collections/JetBrains/mellum-2) (12B-A2.5B, JetBrains). It runs on [Pi](https://github.com/badlogic/pi-mono), a small open harness. The larger model, OpenAI's `gpt-oss:20b`, marks the next tier. The work is three TypeScript utilities, each implemented from a written specification: a parser for `.env` files, a slugifier that turns a title into a URL segment, and a parser for query strings. The model is given a natural-language specification and a typed, empty function stub, and must complete it. The result is graded on hidden tests, five runs each.
 
-| Arm | Pass (hidden tests) |
-|-----|---------------------|
-| Mellum2 floor | 27% |
-| + verify-repair | 40% |
-| + verify-repair + best-of-N | **73%** |
-| gpt-oss:20b (ceiling) | 80% |
+| Setup | Tasks passed (hidden tests) |
+|-------|-----------------------------|
+| Mellum2, stock harness | 27% |
+| with verify-repair | 40% |
+| with verify-repair and best-of-N | 73% |
+| gpt-oss:20b, stock harness | 80% |
 
-**The harness takes the small model from 27% to 73%, closing about 85% of the gap
-to the next tier, for free.** Full analysis and caveats in [FINDINGS.md](./FINDINGS.md).
+The two changes raise the small model from 27% to 73%; the larger model scores 80%. The changes recover most of the gap, at no extra token cost. `FINDINGS.md` gives the complete numbers and the caveats.
 
-## What is a harness, and why Pi
+## Why these tasks
 
-A harness is the scaffolding around a language model that turns it into a coding
-agent: it reads files, calls tools (edit, run a command), and loops until the job
-is done. The model is the engine; the harness is the rest of the car. We build on
-[Pi](https://github.com/badlogic/pi-mono), a small open harness, because it is
-minimal and the modifications stay transparent. This project changes the harness,
-never the model.
+A harness change helps only where the model fails, and only when the failure can be corrected from a test result. These three tasks meet both conditions. Each has a short, exact specification and many edge cases: an empty input, a quoted value, a repeated key. The model usually handles the common case and fails an edge case. The failure appears as a failing test, and from the test the model can repair its code. A harder problem, wrong in its overall approach rather than in a detail, gives the harness nothing to repair. The tasks were also chosen in advance, by running the small model and keeping only the ones it failed; there is no point measuring a change where the baseline already passes.
 
-## The rungs
+## The two changes
 
-Each rung is one composable modification. The two that carry the result:
+Each change is simple and deterministic. Neither has access to the hidden tests.
 
-1. **verify-repair**. After the model writes code, run the visible tests; on
-   failure, hand the failures back and let it fix, up to 3 rounds. What a
-   developer does with a failing suite.
-2. **best-of-N**. Sample the model N times (N=2), keep the attempt that passes the
-   visible tests.
+`verify-repair` runs the visible tests after the model writes its code. If a test fails, the harness returns the failure to the model, which tries again, up to three times. This is the loop a programmer runs by hand against a failing suite.
 
-Also included and pluggable: `localization`, `few-shot`, `reasoning`. Each lives
-in one file under `src/rungs/`.
+`best-of-N` asks the model twice and keeps the answer that passes the visible tests.
 
-## How it works
+Three other changes (`localization`, `few-shot`, `reasoning`) are included but were not needed for this result. Each is one file under `src/rungs/`.
 
-- **Floor vs ceiling**: two local models. The floor is the small model we lift;
-  the ceiling is a larger local model that marks the "next tier".
-- **Tasks**: implement-to-spec utilities with edge-case-heavy tests. Each task
-  splits tests into a visible pool (the repair loop may see these) and a disjoint
-  hidden pool (grading only). The model never sees the hidden tests.
-- **Isolation**: the agent edits a sandbox outside the repo; grading runs hidden
-  tests on a pristine copy, so a model cannot pass by editing tests.
-- **Task selection**: tasks are pre-screened so the floor model genuinely fails
-  them. A harness can only help where there is a gap.
+## How it is measured
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for internals.
+The grading gives the model no advantage. It is scored on hidden tests it never sees, run on a clean copy it cannot reach, so it cannot pass by editing a test. Each configuration runs five times, and the result is the pass rate. The full method is in the repository.
 
-## Quickstart
+## Running it
 
-Everything runs locally. You need [Ollama](https://ollama.com) and, for a
-second model, a [llama.cpp](https://github.com/ggml-org/llama.cpp) server.
+Everything runs locally, using [Ollama](https://ollama.com) and a [llama.cpp](https://github.com/ggml-org/llama.cpp) server.
 
 ```bash
-npm ci                       # exact pinned versions
-npm run check                # lint, typecheck, tests
+npm ci            # install (exact pinned versions)
+npm run check     # lint, typecheck, tests
 
-ollama pull gpt-oss:20b      # the ceiling model
-# serve a floor model with llama.cpp on :8080 (see scripts/reproduce.ts header)
+ollama pull gpt-oss:20b      # the larger model
+# serve the small model with a llama.cpp server on :8080
+# (the command is at the top of scripts/reproduce.ts)
 
-npm run reproduce            # run the ladder above and write results/summary/ladder.md
+npm run reproduce            # run the comparison, write results/summary/ladder.md
 ```
 
-Other entry points: `npm run pilot` (quick rung screen on one model), `npm run
-bench` (cumulative ladder over all tasks), `npm run report` (redraw the chart).
+`npm run pilot` screens the changes; `npm run bench` runs all tasks; `npm run report` redraws the table.
 
-## Docs
+## Documents
 
-- [FINDINGS.md](./FINDINGS.md): the result, in full, with honest caveats.
-- [ARCHITECTURE.md](./ARCHITECTURE.md): internals, data flow, the Rung contract.
-- [AGENTS.md](./AGENTS.md): rules for agents working in the repo, task authoring.
-- [GLOSSARY.md](./GLOSSARY.md): every term in plain language, no background assumed.
+- [FINDINGS.md](./FINDINGS.md): the result in full, with caveats.
+- [ARCHITECTURE.md](./ARCHITECTURE.md): how it works inside.
+- [AGENTS.md](./AGENTS.md): rules for agents in the repo, and how to add a task.
+- [GLOSSARY.md](./GLOSSARY.md): every term in plain language.
