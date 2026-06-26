@@ -1,6 +1,6 @@
 # open-harness-ablation
 
-A coding agent is a model plus a harness. The harness is the program around the model: it reads files, runs tools, and loops until the task is done. Most effort goes into choosing the model. This project leaves the model alone and changes the harness, which is open source, so each change is plain to read and to verify. Two such changes, both deterministic, raise a 12B-A2.5B model close to a model twice its size on a small set of coding tasks chosen so the smaller model fails them. The model is unchanged. Everything runs locally, and no calls are billed.
+A <em>coding agent</em> is a model plus a harness. The harness is the program around the model: it reads files, runs tools, and loops until the task is done. Most effort goes into choosing the model. This project leaves the model choice fixed and changes the harness, which is open source, so each change is plain to read and to verify. Two such changes, both deterministic, raise a 12B-A2.5B model close to a model twice its size on a small set of coding tasks chosen so the smaller model fails them. The model is unchanged. Everything runs locally (no API calls are billed).
 
 ## Result
 
@@ -13,7 +13,7 @@ The small model is [Mellum2](https://huggingface.co/collections/JetBrains/mellum
 | with verify-repair and best-of-N | 73% (11/15) |
 | gpt-oss:20b, stock harness | 80% (12/15) |
 
-The two changes raise the small model from 27% to 73%; the larger model scores 80%. On this small, deliberately gap-selected set, the changes recover most of the distance to the larger model. They add no billed API cost, but they do spend more local inference: best-of-N samples twice, and verify-repair retries. `FINDINGS.md` gives the complete numbers and the caveats.
+The two changes raise the small model's performance from 27% to 73%; the larger model scores 80%. On this small, deliberately gap-selected set, the changes recover most of the distance to the larger model. They add no billed API cost, but they do spend more local inference: best-of-N samples twice, and verify-repair retries. `FINDINGS.md` gives the complete numbers and the caveats.
 
 NB: I use a small number of tasks and seeds because the ablation is multiplicative: tasks × variants × trials × hidden tests. A 20-task version is feasible but slow; this repo is meant to expose the mechanism, not exhaustively estimate it.
 
