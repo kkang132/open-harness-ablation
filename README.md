@@ -56,6 +56,16 @@ npm run reproduce            # run the comparison, write results/summary/ladder.
 
 `npm run pilot` screens the changes; `npm run bench` runs all tasks; `npm run report` redraws the table.
 
+## A more robust test
+
+This toy trades rigour for run time. To make it something you would trust:
+
+- **More seeds.** Raise k from 5 to perhaps 30 and report a confidence interval; the single-cell noise here (one arm dipping on one task) goes away with more seeds.
+- **More tasks.** Add families and more instances per family across the difficulty band. Floor-pre-screen each (run the small model first) and keep the ones it fails, so every task has headroom. A pass rate over 200 trials means something; over 15 it does not.
+- **More rungs.** The repo ships `localization`, `few-shot`, `reasoning`, and a tool-call adapter beside the two used here. Run them as arms, both cumulative and leave-one-out (drop one rung at a time), to read each rung's marginal lift. Localization only earns its place once tasks span multiple files.
+- **A cost axis.** The runner already records tokens and dollar cost per trial; for local models it reads zero. Point one or two arms at cloud models (Pi supports several providers; supply a key) and the ladder gains a quality-against-cost view: what each rung buys, and what it spends. The shipped harness is local-only, so this means wiring a cloud provider back in.
+- **A time budget.** Cloud inference is faster and runs in parallel, so a far larger sweep finishes in a few hours where the same on one laptop would not. Design for what completes in, say, under four hours, then scale k and task count to fill it.
+
 ## Documents
 
 - [FINDINGS.md](./FINDINGS.md): the result in full, with caveats.
