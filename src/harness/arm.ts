@@ -1,9 +1,8 @@
-// An arm is stock Pi plus an ordered list of rungs. The ablation ladder is a list
-// of arms. Cumulative ladder adds one rung per step; leave-one-out drops one from
-// the full set. Both are just arm lists, no special code.
+// An arm is a model plus an ordered list of rungs. The ablation ladder is a list
+// of arms; the cumulative ladder adds one rung per step.
 //
-// Reasoning is held constant across all arms (a model knob, not a structural mod),
-// so it is not part of the default ladder. Add it deliberately when studying it.
+// Reasoning is a model knob rather than a structural rung, so it is not in the
+// candidate set; add it to an arm deliberately when studying it.
 
 import { bestOfNRung } from "../rungs/best-of-n.ts";
 import { fewShotRung } from "../rungs/few-shot.ts";
@@ -29,17 +28,8 @@ export interface Arm {
 // Candidate rungs in oracle-leverage order. The pilot screens these one at a time.
 export const CANDIDATE_RUNGS: Rung[] = [verifyRepairRung(), bestOfNRung(2), localizationRung(), fewShotRung()];
 
-// Bar A: the floor. Local 20b, stock Pi, no rungs.
+// Bar A: the floor. Local model, stock harness, no rungs.
 export const FLOOR: Arm = { name: "A", label: "gpt-oss:20b stock Pi", modelKey: "local-20b", rungs: [] };
-
-// Optional anchor below A: stock Pi with built-in tools disabled.
-export const SUB_FLOOR: Arm = {
-  name: "A0",
-  label: "gpt-oss:20b, built-ins off",
-  modelKey: "local-20b",
-  rungs: [],
-  noBuiltins: true,
-};
 
 // The cumulative ladder: A, then +each candidate rung in order, ending at hero B.
 export function cumulativeLadder(): Arm[] {
@@ -53,21 +43,6 @@ export function cumulativeLadder(): Arm[] {
       label: isHero ? `gpt-oss:20b + all rungs` : `gpt-oss:20b + ${acc.map((r) => r.name).join(" + ")}`,
       modelKey: "local-20b",
       rungs: acc.slice(),
-    });
-  });
-  return arms;
-}
-
-// Leave-one-out: the full set, then one arm per rung with that rung removed.
-export function leaveOneOut(): Arm[] {
-  const full = CANDIDATE_RUNGS;
-  const arms: Arm[] = [{ name: "B", label: "gpt-oss:20b + all rungs", modelKey: "local-20b", rungs: full.slice() }];
-  full.forEach((rung) => {
-    arms.push({
-      name: `B-no-${rung.name}`,
-      label: `all rungs except ${rung.name}`,
-      modelKey: "local-20b",
-      rungs: full.filter((r) => r !== rung),
     });
   });
   return arms;
