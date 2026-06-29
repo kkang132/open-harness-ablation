@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Cheap harness modifications lift a small local model toward the next model tier on real-world SWE tasks.",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "pilot": "tsx scripts/pilot.ts",
