@@ -1,0 +1,63 @@
+# Continuous integration for open-harness-ablation.
+#
+# What this is: the deterministic, no-model checks run on a clean machine for
+# every pull request, and once more after merge to main as a backstop.
+#
+# Why only these: the model runs (pilot, bench, reproduce) need a local GPU with
+# Ollama and a llama.cpp server, which a hosted runner does not have. So CI runs
+# only the parts that are reproducible anywhere: lint, typecheck, unit tests, the
+# task invariants, and the two "Proofs" from AGENTS.md. These are inert for anyone
+# building locally; nothing here is needed to clone and run the project.
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Strict, pinned install from the committed lockfile. The lockfile is
+      # generated on Linux so it carries the platform-specific optional packages
+      # this runner needs; the same lockfile also satisfies `npm ci` on macOS.
+      - name: Install
+        run: npm ci
+
+      # biome lint + tsc typecheck + vitest unit tests.
+      - name: Check
+        run: npm run check
+
+      # Every task's stub must fail its own visible tests, so each task is
+      # genuinely unsolved (catches a seed accidentally completed).
+      - name: Verify tasks
+        run: npm run verify:tasks
+
+      # Proof: no rung can reach the hidden tests. In CI the exit code is the
+      # pass/fail signal, so a match must fail the build (the inverse of the
+      # human-readable grep in AGENTS.md).
+      - name: Proof - no hidden-test leak
+        run: |
+          if grep -rnE "hiddenCmd|gradeHidden|hiddenPool|hidden-pool" src/rungs; then
+            echo "LEAK: a rung references the hidden tests"
+            exit 1
+          fi
+          echo "ok: no hidden-test leak"
+
+      # Proof: nothing local or secret is tracked by git.
+      - name: Proof - nothing secret tracked
+        run: |
+          if git ls-files | grep -E "^results/|(^|/)\.idea/|(^|/)\.env$"; then
+            echo "TRACKED: remove it"
+            exit 1
+          fi
+          echo "ok: nothing secret tracked"
